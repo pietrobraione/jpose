@@ -1273,10 +1273,11 @@ public final class Interpreter {
 
 		J.resetAtBranch();
 		J.resetCompanion();
+		var prePathConditionSize = J.pathCondition().size();
 		stepRefinementStar(J);
 		var Js = stepComputation(J);
-		if (Js.size() > 1) {
-			for (var Jnext : Js) {
+		for (var Jnext : Js) {
+			if (Jnext.pathCondition().size() > prePathConditionSize) {
 				Jnext.setAtBranch();
 			}
 		}
@@ -1308,14 +1309,12 @@ public final class Interpreter {
 		
 		var J0 = new SemConfiguration(p);
 		var Js = List.of(J0);
-		int width = 1;
 		for (int i = 0; i < n; ++i) {
 			//System.out.println(i);
 			Js = Js.stream().filter(J -> { return !isLeaf(J); }).map(J -> { return step(J); }).flatMap(Collection::stream).collect(Collectors.toList());
-			if (solver != null && Js.size() > width) {
+			if (solver != null) {
 				Js = Js.stream().filter(solver::filter).collect(Collectors.toList());
 			}
-			width = Js.size();
 		}
 		
 		return Js;
@@ -1333,16 +1332,14 @@ public final class Interpreter {
 		
 		var J0 = new SemConfiguration(p);
 		var Js = List.of(J0);
-		int width = 1;
 		var retVal = new ArrayList<SemConfiguration>();
 		for (int i = 0; i < n; ++i) {
 			//System.out.println(i);
 			Js = Js.stream().filter(J -> { return !isLeaf(J); }).map(J -> { return step(J); }).flatMap(Collection::stream).collect(Collectors.toList());
-			if (solver != null && Js.size() > width) {
+			if (solver != null) {
 				Js = Js.stream().filter(solver::filter).collect(Collectors.toList());
 			}
 			retVal.addAll(Js.stream().filter(J -> { return isLeaf(J); }).collect(Collectors.toList()));
-			width = Js.size();
 		}
 		
 		return retVal;
