@@ -17,8 +17,10 @@ public interface SmtSolver {
 		return retVal;
 	}
 	boolean querySat(SemConfiguration J);
+	String getModel(SemConfiguration J);
 	long totalSolverTimeMillis();
 	long totalNumberOfQueries();
 	long totalNumberOfQueriesSat();
+	long totalModelTimeMillis();
 	void quit();
 }

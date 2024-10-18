@@ -1,5 +1,6 @@
 package jpose;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +18,7 @@ import jpose.smt.SmtSolverUnwind;
 import jpose.syntax.SyProgram;
 
 public final class Main {
-	private static enum ToPrint { CONFIGS, COUNT, SMT, STATS }
+	private static enum ToPrint { CONFIGS, COUNT, MODELS, SMT, STATS }
 	
 	private static String filenameSrc = "";
 	private static String z3 = "/usr/local/bin/z3";
@@ -44,6 +45,8 @@ public final class Main {
 				nextZ3 = true;
 			} else if ("-c".equals(args[i])) {
 				toPrint = ToPrint.COUNT;
+			} else if ("-m".equals(args[i])) {
+				toPrint = ToPrint.MODELS;
 			} else if ("-s".equals(args[i])) {
 				toPrint = ToPrint.SMT;
 			} else if ("-t".equals(args[i])) {
@@ -63,10 +66,12 @@ public final class Main {
 		}
 		
 		if (help) {
-			System.out.println("Usage: java -jar <pose_jar> [-c|-s] [-l] [-p] [-z <z3_path>] source depth");
+			System.out.println("Usage: java -jar <pose_jar> [-c|-s|-m|-t] [-l] [-p] [-z <z3_path>] [-u] source depth");
 			System.out.println("  -c: prints count of configs");
 			System.out.println("  -s: prints smtlib of path condition");
-			System.out.println("  -t: prints time statistics of Z3 queries");
+			System.out.println("  -m: prints model of (satisfiable) path condition");
+			System.out.println("  -t: prints time statistics of Z3 queries; if -l is active");
+			System.out.println("      prints time statistics of model generation");
 			System.out.println("  -l: considers leaves instead of configs at depth");
 			System.out.println("  -p: prunes infeasible with Z3");
 			System.out.println("  -z <z3_path>: specifies the path of the Z3 executable (default: /usr/local/bin/z3)");		
@@ -83,6 +88,9 @@ public final class Main {
 				case COUNT:
 					leavesCountAt(depth);
 					break;
+				case MODELS:
+					leavesModelsAt(depth);
+					break;
 				case SMT:
 					leavesSmtAt(depth);
 					break;
@@ -97,6 +105,9 @@ public final class Main {
 					break;
 				case COUNT:
 					countAt(depth);
+					break;
+				case MODELS:
+					modelsAt(depth);
 					break;
 				case SMT:
 					smtAt(depth);
@@ -161,6 +172,22 @@ public final class Main {
 		}
 	}
 	
+	private static void leavesModelsAt(int depth) {
+		final ParseResult<SyProgram> r = readAndParseFile();
+		if (r.parsed().isPresent()) {
+			final SyProgram prg = r.parsed().get();
+			final Interpreter intp = new Interpreter();
+			final List<SemConfiguration> Js;
+			Js = intp.leavesAtPrune(prg, depth, z3Solver);
+			for (var J : Js) {
+				System.out.println(z3Solver.getModel(J));
+				System.out.println("\n=========\n");
+			}
+		} else {
+			System.out.println("parsing error");
+		}
+	}
+	
 	private static void leavesSmtAt(int depth) {
 		final ParseResult<SyProgram> r = readAndParseFile();
 		if (r.parsed().isPresent()) {
@@ -183,8 +210,26 @@ public final class Main {
 		if (r.parsed().isPresent()) {
 			final SyProgram prg = r.parsed().get();
 			final Interpreter intp = new Interpreter();
-			intp.leavesAtPrune(prg, depth, z3Solver);
-			printStats();
+			final List<SemConfiguration> Js;
+			Js = intp.leavesAtPrune(prg, depth, z3Solver);
+			long emitTimeMillisFile = 0L;
+            final Path filePath;
+			try {
+				filePath = Files.createTempFile("dummy", ".txt");
+			} catch (IOException e) {
+                throw new RuntimeException(e);
+			}
+            try (final BufferedWriter w = Files.newBufferedWriter(filePath)) {
+				for (var J : Js) {
+					String model = z3Solver.getModel(J);
+					long startMillis = System.currentTimeMillis();
+		            w.write(model); w.flush();
+					emitTimeMillisFile += System.currentTimeMillis() - startMillis;
+				}
+				printLeavesStats(emitTimeMillisFile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 		} else {
 			System.out.println("parsing error");
 		}
@@ -220,6 +265,22 @@ public final class Main {
 		}
 	}
 	
+	private static void modelsAt(int depth) {
+		final ParseResult<SyProgram> r = readAndParseFile();
+		if (r.parsed().isPresent()) {
+			final SyProgram prg = r.parsed().get();
+			final Interpreter intp = new Interpreter();
+			final List<SemConfiguration> Js;
+			Js = intp.stepAtPrune(prg, depth, z3Solver);
+			for (var J : Js) {
+				System.out.println(z3Solver.getModel(J));
+				System.out.println("\n=========\n");
+			}
+		} else {
+			System.out.println("parsing error");
+		}
+	}
+	
 	private static void smtAt(int depth) {
 		final ParseResult<SyProgram> r = readAndParseFile();
 		if (r.parsed().isPresent()) {
@@ -250,6 +311,10 @@ public final class Main {
 	}
 	
 	private static void printStats() {
-		System.out.println("Spent " + (z3Solver == null ? 0.0 : (((float) z3Solver.totalSolverTimeMillis()) / 1000)) + " seconds in " + (z3Solver == null ? 0L : z3Solver.totalNumberOfQueries()) + " Z3 queries, " + (z3Solver == null ? 0L : z3Solver.totalNumberOfQueriesSat()) + " Z3 sat queries");
+		System.out.println("Spent " + (z3Solver == null ? 0L : z3Solver.totalSolverTimeMillis()) + " msec in " + (z3Solver == null ? 0L : z3Solver.totalNumberOfQueries()) + " Z3 queries, " + (z3Solver == null ? 0L : z3Solver.totalNumberOfQueriesSat()) + " Z3 sat queries");
+	}
+	
+	private static void printLeavesStats(long emitTimeMillisFile) {
+		System.out.println("Spent " + (z3Solver == null ? 0L : z3Solver.totalModelTimeMillis()) + " msec solving and " + emitTimeMillisFile + " emitting on file Z3 models");
 	}
 }

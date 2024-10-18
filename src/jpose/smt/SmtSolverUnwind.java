@@ -23,13 +23,13 @@ import jpose.syntax.SyValueReferenceConstant;
 import jpose.syntax.SyValueSub;
 
 public final class SmtSolverUnwind implements SmtSolver {
-	private final SmtSolverPlain smtSolver;
+	private final SmtSolverPlain smtSolverPlain;
 	private final TrieClause cacheUnsat;
 	private final boolean doNotUseOptimizations;
 	private final boolean doNotUnwind;
 	
 	public SmtSolverUnwind(Path solverPath, boolean doNotUseOptimizations, boolean doNotUnwind) {
-		this.smtSolver = new SmtSolverPlain(solverPath);
+		this.smtSolverPlain = new SmtSolverPlain(solverPath);
 		this.cacheUnsat = new TrieClause();
 		this.doNotUseOptimizations = doNotUseOptimizations;
 		this.doNotUnwind = doNotUnwind;
@@ -40,7 +40,7 @@ public final class SmtSolverUnwind implements SmtSolver {
 		var P = J.syProgramLit();
 		var pcs = possiblyUnwindPathCondition(J.pathCondition());
 		for (var pc : pcs) {
-			var sat = surelyUnsat(pc) ? false : this.smtSolver.querySat(P, pc);
+			var sat = surelyUnsat(pc) ? false : this.smtSolverPlain.querySat(P, pc);
 			if (sat) {
 				return true;
 			} else {
@@ -52,23 +52,33 @@ public final class SmtSolverUnwind implements SmtSolver {
 	}
 	
 	@Override
+	public String getModel(SemConfiguration J) {
+		return this.smtSolverPlain.getModel(J);
+	}
+	
+	@Override
 	public long totalSolverTimeMillis() {
-		return this.smtSolver.totalSolverTimeMillis();
+		return this.smtSolverPlain.totalSolverTimeMillis();
 	}
 	
 	@Override
 	public long totalNumberOfQueries() {
-		return this.smtSolver.totalNumberOfQueries();
+		return this.smtSolverPlain.totalNumberOfQueries();
 	}
 
 	@Override
 	public long totalNumberOfQueriesSat() {
-		return this.smtSolver.totalNumberOfQueriesSat();
+		return this.smtSolverPlain.totalNumberOfQueriesSat();
+	}
+	
+	@Override
+	public long totalModelTimeMillis() {
+		return this.smtSolverPlain.totalModelTimeMillis();
 	}
 	
 	@Override
 	public void quit() {
-		this.smtSolver.quit();
+		this.smtSolverPlain.quit();
 	}
 	
 	private Iterable<List<SyValue>> possiblyUnwindPathCondition(List<SyValue> pathCondition) {
