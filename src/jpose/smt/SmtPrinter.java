@@ -308,6 +308,22 @@ public final class SmtPrinter {
 		}
 	}
 	
+	private String declareVarsReferenceConstraints(SyProgram P, Set<SySymbol> symbolsReference) {
+		final StringBuilder retVal = new StringBuilder();
+		for (SySymbol s : symbolsReference) {
+			retVal.append("(assert (or ");
+			for (SyDeclClass C : ((SyProgramLit) P).classes()) {
+				retVal.append("(= (classOf ");
+				retVal.append(referenceConstantToSmt(new SyReferenceConstantSymbol(s)));
+				retVal.append(") ");
+				retVal.append(((SyDeclClassLit) C).className());
+				retVal.append(") ");
+			}
+			retVal.append("))\n");
+		}
+		return retVal.toString();
+	}
+	
 	private String declareVars(SyProgram P, List<SyValue> pathCondition) {
 		var symbolsPrimitive = new LinkedHashSet<SySymbol>(); 
 		var symbolsReference = new LinkedHashSet<SySymbol>();
@@ -317,6 +333,7 @@ public final class SmtPrinter {
 		for (SyValue sigma : pathCondition) {
 			retVal.append(declareVarsClause(P, sigma, symbolsPrimitive, symbolsReference, symbolsLoc));
 		}
+		retVal.append(declareVarsReferenceConstraints(P, symbolsReference));
 		return retVal.toString();
 	}
 	
