@@ -21,8 +21,10 @@ class LinkedListNode extends Object {
 class NodeCachingLinkedList extends Object {
   LinkedListNode header;
   int size;
+  int modCount;
   LinkedListNode firstCachedNode;
   int cacheSize;
+  int maximumCacheSize;
 
   Void add(Object value) :=
     (this.addLast[value]);
@@ -69,4 +71,28 @@ class NodeCachingLinkedList extends Object {
     let n := new LinkedListNode in
     let foo14 := (n.value := value) in
     n;
+    
+  Void removeNode(LinkedListNode node) :=
+    let foo15 := (this.superRemoveNode[node]) in
+    let foo16 := (this.addNodeToCache[node]) in
+    null;
+    
+  Void superRemoveNode(LinkedListNode node) :=
+    let foo17 := ((node.previous).next := (node.next)) in
+    let foo18 := ((node.next).previous := (node.previous)) in
+    let foo19 := (this.size := ((this.size) - 1)) in
+    let foo20 := (this.modCount := ((this.modCount) + 1)) in
+    null;
+    
+  Void addNodeToCache(LinkedListNode node) :=
+    if ((this.cacheSize) < (this.maximumCacheSize)) then
+      let nextCachedNode := (this.firstCachedNode) in
+      let foo21 := (node.previous := null) in
+      let foo22 := (node.next := nextCachedNode) in
+      let foo23 := (node.value := null) in
+      let foo24 := (this.firstCachedNode := node) in
+      let foo25 := (this.cacheSize := ((this.cacheSize) + 1)) in
+      null
+    else
+      null;
 }

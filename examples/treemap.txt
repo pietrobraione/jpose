@@ -44,6 +44,11 @@ class FixAfterInsertionLoopFrame extends Object {
   Entry xx;
 }
 
+class ValueSearchNNParameters extends Object {
+  Entry n;
+  Object val;
+}
+
 class TreeMap extends Object {
   Entry root;
   int size;
@@ -276,4 +281,33 @@ class TreeMap extends Object {
     let foo9 := (l.right := p) in
     let foo10 := (p.parent := l) in
     new Void;
+    
+  bool containsValue(Object value) :=
+    if (value = null) then (this.valueSearchNull[(this.root)])
+    else
+      let par := new ValueSearchNNParameters in
+      let foo1 := (par.n := (this.root)) in
+      let foo2 := (par.val := value) in
+      (this.valueSearchNonNull[par]);
+
+  bool valueSearchNull(Entry nn) := 
+    if ((nn.value) = null) then true
+    else
+      let checkLeft := if (~((nn.left) = null)) then (this.valueSearchNull[(nn.left)]) else false in
+      let checkRight := if (~((nn.right) = null)) then (this.valueSearchNull[(nn.right)]) else false in
+      (checkLeft || checkRight);
+
+  bool valueSearchNonNull(ValueSearchNNParameters par) := 
+    if (((par.n).value) = (par.val)) then true
+    else
+      let parLeft := new ValueSearchNNParameters in
+      let foo1 := (parLeft.n := ((par.n).left)) in
+      let foo2 := (parLeft.val := (par.val)) in
+      let checkLeft := if (~(((par.n).left) = null)) then (this.valueSearchNonNull[parLeft]) else false in
+      let parRight := new ValueSearchNNParameters in
+      let foo3 := (parRight.n := ((par.n).right)) in
+      let foo4 := (parRight.val := (par.val)) in
+      let checkRight := if (~(((par.n).right) = null)) then (this.valueSearchNonNull[parRight]) else false in
+      (checkLeft || checkRight);
+
 }
