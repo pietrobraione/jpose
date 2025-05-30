@@ -27,6 +27,7 @@ import jpose.syntax.SyExpressionAdd;
 import jpose.syntax.SyExpressionAnd;
 import jpose.syntax.SyExpressionEq;
 import jpose.syntax.SyExpressionGetfield;
+import jpose.syntax.SyExpressionId;
 import jpose.syntax.SyExpressionIf;
 import jpose.syntax.SyExpressionInstanceof;
 import jpose.syntax.SyExpressionInvoke;
@@ -684,6 +685,11 @@ public final class Interpreter {
 				JCurr.setSyExpression(new SyExpressionInvoke(e1New, m, e2));
 			}
 			return Js;
+		} else if (e instanceof SyExpressionId(String idName)) {
+			J.addConfigurationId(idName);
+			var eNew = new SyExpressionValue(new SyValuePrimitiveConstant(new SyPrimitiveConstantBool(new SyBoolFalse())));
+			J.setSyExpression(eNew);
+			return List.of(J);
 		} else { //SyExpressionVariable, SyExpressionValue
 			throw new StuckException("Cannot step-compute an expression");
 		}

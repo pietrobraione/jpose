@@ -27,6 +27,13 @@ class TestParser {
 	}
 	
 	@Test
+	void testTokenizer2() {
+		var t = new Tokenizer();
+		var l = t.tokenize("let x := (@ _10) in null");
+		assertEquals(List.of("let", "x", ":=", "(", "@", "_10", ")", "in", "null"), l);
+	}
+	
+	@Test
 	void testParser1() {
 		var p = new ParserMatchToken("a");
 		var pStar = p.star();
@@ -144,6 +151,13 @@ class TestParser {
 				+ "(y.hasNullWithin[new Void])";
 		var p = new ParserProgram();
 		var r = p.parse(s);
+		assertTrue(r.parsed().isPresent());
+	}
+	
+	@Test
+	void testParser9() {
+		var p = new ParserExpression();
+		var r = p.parse(List.of("let", "x", ":=", "(", "@", "_10", ")", "in", "null"));
 		assertTrue(r.parsed().isPresent());
 	}
 }

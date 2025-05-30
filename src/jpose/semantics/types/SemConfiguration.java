@@ -31,6 +31,7 @@ public final class SemConfiguration {
 	private Optional<SemConfiguration> companion;
 	private SyExpression syExpression;
 	private int nextLocId;
+	private String configurationId;
 	
 	public SemConfiguration(SyProgram syProgram) {
 		switch (syProgram) {
@@ -46,6 +47,7 @@ public final class SemConfiguration {
 		this.companion = Optional.empty();
 		this.syExpression = this.syProgramLit.syExpression();
 		this.nextLocId = 0;
+		this.configurationId = "";
 	}
 	
 	public SemConfiguration(SemConfiguration other) {
@@ -60,6 +62,7 @@ public final class SemConfiguration {
 		this.companion = other.companion;
 		this.syExpression = other.syExpression;
 		this.nextLocId = other.nextLocId;
+		this.configurationId = other.configurationId;
 	}
 	
 	public SyProgramLit syProgramLit() {
@@ -205,5 +208,15 @@ public final class SemConfiguration {
 				}
 			}
 		}
+	}
+	
+	public String configurationId() {
+		return this.configurationId;
+	}
+	
+	public void addConfigurationId(String toAdd) {
+		Objects.requireNonNull(toAdd);
+		
+		this.configurationId += toAdd;
 	}
 }

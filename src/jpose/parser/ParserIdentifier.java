@@ -10,7 +10,7 @@ public final class ParserIdentifier implements Parser<String> {
 			return new ParseResult<>(tokens, OptionalError.error("Expected identifier, found end of stream"));
 		} else {
 			var token = tokens.getFirst();
-			if (token.length() >= 1 && Character.isAlphabetic(token.charAt(0))) {
+			if (token.length() >= 1 && (Character.isAlphabetic(token.charAt(0)) || token.charAt(0) == '_')) {
 				var tokensEtc = new ArrayList<>(tokens.subList(1, tokens.size()));
 				return new ParseResult<>(tokensEtc, OptionalError.of(token));
 			} else {

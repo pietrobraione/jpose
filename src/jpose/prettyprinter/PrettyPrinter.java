@@ -22,6 +22,7 @@ import jpose.syntax.SyExpressionAdd;
 import jpose.syntax.SyExpressionAnd;
 import jpose.syntax.SyExpressionEq;
 import jpose.syntax.SyExpressionGetfield;
+import jpose.syntax.SyExpressionId;
 import jpose.syntax.SyExpressionIf;
 import jpose.syntax.SyExpressionInstanceof;
 import jpose.syntax.SyExpressionInvoke;
@@ -93,7 +94,7 @@ public final class PrettyPrinter {
 		} else if (bool instanceof SyBoolFalse) {
 			return "false";
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected bool");
 		}
 	}
 	
@@ -103,7 +104,7 @@ public final class PrettyPrinter {
 		if (i instanceof SyIntLit(int n)) {
 			return Integer.toString(n);
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected int");
 		}
 	}
 	
@@ -113,7 +114,7 @@ public final class PrettyPrinter {
 		if (l instanceof SyLocLit(int p)) {
 			return "L" + Integer.toString(p);
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected location");
 		}
 	}
 	
@@ -125,7 +126,7 @@ public final class PrettyPrinter {
 		} else if (s instanceof SySymbolField(int n, List<String> l)) { 
 			return Integer.toString(n) + "_" + l.stream().collect(Collectors.joining("_"));
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected symbol");
 		}
 	}
 
@@ -139,7 +140,7 @@ public final class PrettyPrinter {
 		} else if (p instanceof SyPrimitiveConstantSymbol(SySymbol s)) {
 			return "X" + symbolToString(s);
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected primitive constant");
 		}
 	}
 	
@@ -153,7 +154,7 @@ public final class PrettyPrinter {
 		} else if (u instanceof SyReferenceConstantSymbol(SySymbol s)) {
 			return "Y" + symbolToString(s);
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected reference constant");
 		}
 	}
 	
@@ -187,7 +188,7 @@ public final class PrettyPrinter {
 		} else if (sigma instanceof SyValueIte(SyValue sigma1, SyValue sigma2, SyValue sigma3)) {
 			return "ite(" + valueToString(sigma1) + ", " + valueToString(sigma2) + ", " + valueToString(sigma3) + ")";
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected value");
 		}
 	}
 	
@@ -226,8 +227,10 @@ public final class PrettyPrinter {
 			return "if " + expressionToString(e1) + " then " + expressionToString(e2) + " else " + expressionToString(e3);
 		} else if (e instanceof SyExpressionInvoke(SyExpression e1, String m, SyExpression e2)) {
 			return "(" + expressionToString(e1) + "." + m + "[" + expressionToString(e2) + "])";
+		} else if (e instanceof SyExpressionId(String idName)) {
+			return "(@ " + idName + ")";
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected expression");
 		}
 	}
 	
@@ -237,7 +240,7 @@ public final class PrettyPrinter {
 		if (F instanceof SyDeclVariableLit(SyType t, String x)) {
 			return typeToString(t) + " " + x + (semicolon ? ";" : "");
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected variable declaration");
 		}
 	}
 	
@@ -247,7 +250,7 @@ public final class PrettyPrinter {
 		if (D instanceof SyDeclMethodLit(SyType t, String m, SyDeclVariable v, SyExpression e)) {
 			return typeToString(t) + " " + m + "(" + declVariableToString(false, v) + ") := " + expressionToString(e) + ";";
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected method declaration");
 		}
 	}
 	
@@ -258,7 +261,7 @@ public final class PrettyPrinter {
 			return "class " + c + ("".equals(cSup) ? "" : (" extends " + cSup)) + " { " + Fs.stream().map(F -> { return declVariableToString(true, F); }).collect(Collectors.joining(" ")) + " " +
 			       Ds.stream().map(D -> { return declMethodToString(D); }).collect(Collectors.joining(" ")) + "}";
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected class declaration");
 		}
 	}
 
@@ -268,7 +271,7 @@ public final class PrettyPrinter {
 		if (P instanceof SyProgramLit(List<SyDeclClass> Cs, SyExpression e)) {
 			return Cs.stream().map(C -> { return declClassToString(C); }).collect(Collectors.joining(" ")) + " " + expressionToString(e);
 		} else {
-			throw new AssertionError("Unexpected type");
+			throw new AssertionError("Unexpected program");
 		}
 	}
 	
@@ -319,6 +322,6 @@ public final class PrettyPrinter {
 		var sSigma = J.pathCondition();
 		var e = J.syExpression();
 		
-		return "[" + programToString(P) + ", " + heapToString(H) + ", " + pathConditionToString(sSigma) + ", " + expressionToString(e) + "]";
+		return "[@" + J.configurationId() + ": " + programToString(P) + ", " + heapToString(H) + ", " + pathConditionToString(sSigma) + ", " + expressionToString(e) + "]";
 	}
 }

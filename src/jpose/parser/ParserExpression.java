@@ -7,6 +7,7 @@ import jpose.syntax.SyExpressionAdd;
 import jpose.syntax.SyExpressionAnd;
 import jpose.syntax.SyExpressionEq;
 import jpose.syntax.SyExpressionGetfield;
+import jpose.syntax.SyExpressionId;
 import jpose.syntax.SyExpressionIf;
 import jpose.syntax.SyExpressionInstanceof;
 import jpose.syntax.SyExpressionInvoke;
@@ -46,6 +47,7 @@ public final class ParserExpression implements Parser<SyExpression> {
 		var pDot = new ParserMatchToken(".");
 		var pLeftSqBracket = new ParserMatchToken("[");
 		var pRightSqBracket = new ParserMatchToken("]");
+		var pAt = new ParserMatchToken("@");
 		
 		return sigma.transform(x -> (SyExpression) new SyExpressionValue(x)).alt(
 			   pnew.andThen(_1 ->
@@ -121,6 +123,10 @@ public final class ParserExpression implements Parser<SyExpression> {
 		         expression.andThen(x -> 
 		         pDot.andThen(_2 -> 
 		         identifier.andThen(y -> 
-		         pRightParens.transform(_3 -> (SyExpression) new SyExpressionGetfield(x, y))))))).parse(tokens);
+		         pRightParens.transform(_3 -> (SyExpression) new SyExpressionGetfield(x, y))))))).alt(
+		  	   pLeftParens.andThen(_1 ->
+		  	     pAt.andThen(_2-> 
+		  	     identifier.andThen(x ->
+		  	     pRightParens.transform(_3 -> (SyExpression) new SyExpressionId(x)))))).parse(tokens);
 	}
 }
