@@ -189,23 +189,31 @@ class AvlTree extends Object {
   let foo2 := (p.arg2 := (this.root)) in
   (this.elementAt[(this.findMinNode[p])]);  
 
-  boolean balancedNode(BalancedNodeParameters p) :=
-  if ((this.depthBound) < (p.depth2)) then true else
+  bool balancedNode(BalancedNodeParameters p) :=
   if ((p.k1) = null) then true else
+  if ((this.depthBound) < (p.depth2)) then true else
   let lh := (this.height[((p.k1).left)]) in
   let rh := (this.height[((p.k1).right)]) in
   let rh1 := (rh + 1) in
   let lh1 := (lh + 1) in
-  let check := (((lh = rh) || (lh = rh1)) || (lh1 = rh)) in
   let p1 := new BalancedNodeParameters in
   let foo1 := (p1.k1 := ((p.k1).left)) in
   let foo2 := (p1.depth2 := ((p.depth2) + 1)) in
-  let p2 := new BalancedNodeParameters in
+  let p2 := new BalancedNodeParameters in 
   let foo3 := (p2.k1 := ((p.k1).right)) in
   let foo4 := (p2.depth2 := ((p.depth2) + 1)) in
-  if ((check && (this.balancedNode[p1])) && (this.balancedNode[p2])) then true else false;
+  if (lh = rh) then
+    if (~(this.balancedNode[p1])) then false else
+    if (~(this.balancedNode[p2])) then false else true
+  else if (lh = rh1) then
+    if (~(this.balancedNode[p1])) then false else
+    if (~(this.balancedNode[p2])) then false else true
+  else if (lh1 = rh) then
+    if (~(this.balancedNode[p1])) then false else
+    if (~(this.balancedNode[p2])) then false else true
+  else false;
 
-  boolean balanced(Void v) :=
+  bool balanced(Void v) :=
   let p := new BalancedNodeParameters in
   let foo1 := (p.k1 := (this.root)) in
   let foo2 := (p.depth2 := 0) in
@@ -215,7 +223,7 @@ class AvlTree extends Object {
   if (k1 = null) then (0 - 1) else
   (k1.element);
 
-  boolean isEmpty(Void v) :=
+  bool isEmpty(Void v) :=
   if ((this.root) = null) then true else false;
   
   Void makeEmpty(Void v) :=
@@ -223,17 +231,20 @@ class AvlTree extends Object {
   null;
  
   AvlNode findN(FindParameters pFind) :=
-  if ((this.depthBound) < (pFind.depth3)) then null else
   let t := (pFind.arg1) in
-  if (t = null) then null else
-  if ((t.element) = (pFind.x1)) then t else 
-  if ((pFind.x1) < (t.element)) then 
+  if (t = null) then let foo4 := (@ _6) in null else
+  let foo5 := (@ _1) in
+  if ((this.depthBound) < (pFind.depth3)) then let foo7 := (@ _2) in null else
+  if ((t.element) = (pFind.x1)) then let foo6 := (@ _5) in t else 
+  if ((pFind.x1) < (t.element)) then
+    let foo8 := (@ _3) in
     let pFind2 := new FindParameters in
     let foo1 := (pFind2.arg1 := (t.left)) in
     let foo2 := (pFind2.x1 := (pFind.x1)) in 
     let foo3 := (pFind2.depth3 := ((pFind.depth3) + 1)) in
     (this.findN[pFind2]) 
   else
+    let foo9 := (@ _4) in
     let pFind3 := new FindParameters in
     let foo4 := (pFind3.arg1 := (t.right)) in
     let foo5 := (pFind3.x1 := (pFind.x1)) in
@@ -255,7 +266,7 @@ class AvlTree extends Object {
   let foo3 := (pFind.depth3 := 0) in
   (this.findN[pFind]);
   
-  boolean maxElementN(FindParameters pFind) :=
+  bool maxElementN(FindParameters pFind) :=
   if ((this.depthBound) < (pFind.depth3)) then true else
   if ((pFind.arg1) = null) then true else
   if ((pFind.x1) < ((pFind.arg1).element)) then false else
@@ -269,14 +280,14 @@ class AvlTree extends Object {
   let foo6 := (pFind2.depth3 := ((pFind.depth3) + 1)) in 
   if (~(this.maxElementN[pFind1])) then false else (this.maxElementN[pFind2]);
 
-  boolean maxElement(int xx) :=
+  bool maxElement(int xx) :=
   let pFind := new FindParameters in
   let foo1 := (pFind.arg1 := (this.root)) in
   let foo2 := (pFind.x1 := xx) in
   let foo3 := (pFind.depth3 := 0) in
   (this.maxElementN[pFind]);
 
-  boolean minElementN(FindParameters pFind) :=
+  bool minElementN(FindParameters pFind) :=
   if ((this.depthBound) < (pFind.depth3)) then true else
   if ((pFind.arg1) = null) then true else
   if (((pFind.arg1).element) < (pFind.x1)) then false else
@@ -290,7 +301,7 @@ class AvlTree extends Object {
   let foo6 := (pFind2.depth3 := ((pFind.depth3) + 1)) in 
   if (~(this.minElementN[pFind1])) then false else (this.minElementN[pFind2]);
  
-  boolean minElement(int xx) :=
+  bool minElement(int xx) :=
   let pFind := new FindParameters in
   let foo1 := (pFind.arg1 := (this.root)) in
   let foo2 := (pFind.x1 := xx) in
