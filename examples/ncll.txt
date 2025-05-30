@@ -12,6 +12,16 @@ class AddNodeParameters extends Object {
   LinkedListNode insertBeforeNode;
 }
 
+class IsEqualValueParameters {
+  Object value1;
+  Object value2;
+}
+
+class RemoveLoopFrame {
+  LinkedListNode _node; 
+  Object _value;
+}
+
 class LinkedListNode extends Object {
   LinkedListNode previous;
   LinkedListNode next;
@@ -95,4 +105,27 @@ class NodeCachingLinkedList extends Object {
       null
     else
       null;
+      
+  bool isEqualValue(IsEqualValueParameters p) := 
+    ((p.value1) = (p.value2));
+    
+  bool remove(Object value) :=
+    let f := new RemoveLoopFrame in
+    let foo26 := (f._node := ((this.header).next)) in
+    let foo27 := (f._value := value) in
+    (this.removeLoop[f]);
+
+  bool removeLoop(RemoveLoopFrame f) := 
+    if ((f._node) = (this.header)) then
+      false
+    else
+      let p := new IsEqualValueParameters in
+      let foo28 := (p.value1 := ((f._node).value)) in
+      let foo29 := (p.value2 := (f._value)) in
+      if (this.isEqualValue[p]) then
+        let foo30 := (this.removeNode[(f._node)]) in
+        true
+      else
+        let foo31 := (f._node := ((f._node).next)) in
+        (this.removeRecursive[f]);
 }

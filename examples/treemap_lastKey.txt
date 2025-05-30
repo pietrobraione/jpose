@@ -1,0 +1,5 @@
+include treemap.txt
+
+let t := Y0 in
+let foo := (t.depthBound := 9) in
+(t.lastKey[null])

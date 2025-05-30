@@ -1,0 +1,6 @@
+include treemap.txt
+
+let t := Y0 in
+let k := X0 in
+let foo := (t.depthBound := 0) in
+(t.remove[k])
