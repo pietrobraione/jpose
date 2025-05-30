@@ -378,7 +378,7 @@ class TreeMap extends Object {
   GetEntryLoopFrame doGetEntryLoop(GetEntryLoopFrame f) :=
     if ((f._p) = null) then f
     else if ((this.depthBound) < (f.depthGetEntry)) then
-      let foo0 := (f.depthGetEntry := null) in f
+      let foo0 := (f._p := null) in f
     else if ((f._k) = ((f._p).key)) then f
     else if ((f._k) < ((f._p).key)) then 
       let foo1 := (f._p := ((f._p).left)) in
