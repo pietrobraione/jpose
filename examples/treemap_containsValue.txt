@@ -2,5 +2,5 @@ include treemap.txt
 
 let t := Y0 in
 let value := Y1 in
-let foo1 := (t.depthBound := 1) in
+let foo1 := (t.depthBound := 2) in
 (t.containsValue[value])
