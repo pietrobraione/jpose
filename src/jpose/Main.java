@@ -131,7 +131,7 @@ public final class Main {
 			throw new RuntimeException(e);
 		}
 		if (src.startsWith("include")) {
-			final String filenameInclude = src.substring(8, src.indexOf('\n'));
+			final String filenameInclude = src.substring(8, src.indexOf('\n')).strip();
 			try {
 				src = Files.readString(Path.of(filenameInclude)) + src.substring(src.indexOf('\n') + 1);
 			} catch (IOException e) {
